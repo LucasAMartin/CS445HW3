@@ -17,11 +17,16 @@ map2_codes_titles = {'T24': 'Motor Vehicles License', 'T25': 'Motor Vehicle Oper
 
 def create_map(item_code, title):
     data = df.loc[item_code]
+    min_val = data.min()
+    max_val = data.max() / 4
+
     fig = go.Figure(data=go.Choropleth(
         locations=data.index,
         z=data.astype(float),
         locationmode='USA-states',
         colorscale='Reds',
+        zmin=min_val,
+        zmax=max_val,
         colorbar_title="Millions USD",
     ))
 

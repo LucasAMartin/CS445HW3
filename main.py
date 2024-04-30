@@ -9,25 +9,25 @@ from dash.dependencies import Input, Output
 # Load the cleaned data
 df = pd.read_csv('cleaned_data.csv', index_col=0)
 
-# Define the item codes for the two maps
-map1_codes = ['T01', 'T09', 'T10', 'T16']
-map2_codes = ['T24', 'T25', 'T40', 'T41']
+map1_codes_titles = {'T01': 'Property Taxes', 'T09': 'General Sales and Gross Receipts Taxes',
+                     'T10': 'Alcoholic Beverages Sales Tax', 'T16': 'Tobacco Products Sales Tax'}
+map2_codes_titles = {'T24': 'Motor Vehicles License', 'T25': 'Motor Vehicle Operators License',
+                     'T40': 'Individual Income Taxes', 'T41': 'Corporation Net Income Taxes'}
 
 
-# Define a function to create a choropleth map for a given item code
-def create_map(item_code):
+def create_map(item_code, title):
     data = df.loc[item_code]
     fig = go.Figure(data=go.Choropleth(
-        locations=data.index, # Spatial coordinates
-        z = data.astype(float), # Data to be color-coded
-        locationmode = 'USA-states', # Set of locations match entries in `locations`
-        colorscale = 'Reds',
-        colorbar_title = "Millions USD",
+        locations=data.index,
+        z=data.astype(float),
+        locationmode='USA-states',
+        colorscale='Reds',
+        colorbar_title="Millions USD",
     ))
 
     fig.update_layout(
-        title_text = f'US State Tax Data for {item_code}',
-        geo_scope='usa', # Limit map scope to USA
+        title_text=f'US State Tax Data for {title}',
+        geo_scope='usa',  # Limit map scope to USA
     )
 
     return fig
@@ -41,8 +41,8 @@ app.layout = html.Div([
     html.Div([
         dcc.Dropdown(
             id='map1-dropdown',
-            options=[{'label': i, 'value': i} for i in map1_codes],
-            value=map1_codes[0]
+            options=[{'label': v, 'value': k} for k, v in map1_codes_titles.items()],
+            value=list(map1_codes_titles.keys())[0]
         ),
         dcc.Graph(id='map1')
     ], style={'width': '49%', 'display': 'inline-block'}),
@@ -50,8 +50,8 @@ app.layout = html.Div([
     html.Div([
         dcc.Dropdown(
             id='map2-dropdown',
-            options=[{'label': i, 'value': i} for i in map2_codes],
-            value=map2_codes[0]
+            options=[{'label': v, 'value': k} for k, v in map2_codes_titles.items()],
+            value=list(map2_codes_titles.keys())[0]
         ),
         dcc.Graph(id='map2')
     ], style={'width': '49%', 'float': 'right', 'display': 'inline-block'})
@@ -64,7 +64,7 @@ app.layout = html.Div([
     [Input('map1-dropdown', 'value'), Input('map2-dropdown', 'value')]
 )
 def update_maps(map1_code, map2_code):
-    return create_map(map1_code), create_map(map2_code)
+    return create_map(map1_code, map1_codes_titles[map1_code]), create_map(map2_code, map2_codes_titles[map2_code])
 
 
 # Run the app
